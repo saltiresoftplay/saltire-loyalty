@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join the Loyalty Card — Saltire Soft Play</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=Outfit:wght@300;400;500;600;700&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #024C97;
+      --navy-deep: #013265;
+      --navy-ink:  #061A38;
+      --cream:     #FFF6E6;
+      --cream-deep:#F6E9CC;
+      --yellow:    #FFC53D;
+      --green:     #4FB477;
+      --red:       #E63946;
+      --ink:       #0A1A2F;
+      --ink-soft:  #3B4A60;
+      --ink-mute:  #6B7A91;
+      --r-md:      22px;
+      --r-lg:      32px;
+      --r-pill:    999px;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--navy-ink);
+      min-height: 100dvh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      background: var(--cream);
+      border-radius: var(--r-lg);
+      padding: clamp(2rem, 5vw, 3rem);
+      width: 100%; max-width: 460px;
+      box-shadow: 0 32px 80px -24px rgba(0,0,0,0.5);
+    }
+
+    /* ── Steps ────────────────────────────────────────────────── */
+    #stepRegister { display: block; }
+    #stepSuccess  { display: none; }
+
+    /* ── Logo ─────────────────────────────────────────────────── */
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1.75rem; text-decoration: none;
+    }
+
+    .logo-text {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--navy); letter-spacing: -0.02em;
+    }
+
+    .logo-sub {
+      font-size: 0.7rem; color: var(--ink-mute); margin-top: -0.15rem;
+    }
+
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700; color: var(--navy-ink);
+      margin: 0 0 0.4rem; line-height: 1.15;
+    }
+
+    .subtitle {
+      color: var(--ink-soft); font-size: 0.95rem;
+      margin: 0 0 1.75rem; line-height: 1.5;
+    }
+
+    /* ── Form ─────────────────────────────────────────────────── */
+    label {
+      display: block; font-size: 0.85rem; font-weight: 600;
+      color: var(--ink); margin-bottom: 0.4rem;
+    }
+
+    input {
+      width: 100%; padding: 0.85rem 1rem;
+      border: 2px solid #D9E4F0;
+      border-radius: var(--r-md);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem; color: var(--navy-ink);
+      background: #fff; outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 1.1rem;
+    }
+
+    input:focus { border-color: var(--navy); }
+    input::placeholder { color: var(--ink-mute); }
+
+    .name-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+    }
+
+    .name-row label { display: block; }
+
+    .password-hint {
+      font-size: 0.775rem; color: var(--ink-mute);
+      margin: -0.75rem 0 1.1rem;
+    }
+
+    .btn-primary {
+      width: 100%; padding: 0.9rem 1.5rem;
+      background: var(--yellow); color: var(--navy-ink);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      border: none; border-radius: var(--r-pill);
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+
+    .btn-primary:hover   { background: #ffb800; }
+    .btn-primary:active  { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-msg {
+      background: #FEE8E9; border: 1.5px solid var(--red);
+      border-radius: var(--r-md); color: #B71C1C;
+      font-size: 0.875rem; padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem; display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    .already-member {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.875rem; color: var(--ink-mute);
+    }
+
+    .already-member a { color: var(--navy); font-weight: 600; text-decoration: none; }
+    .already-member a:hover { text-decoration: underline; }
+
+    /* ── Success screen ────────────────────────────────────────── */
+    .success-header {
+      text-align: center; margin-bottom: 2rem;
+    }
+
+    .success-icon {
+      font-size: 3rem; margin-bottom: 0.75rem;
+    }
+
+    .success-header h1 { font-size: clamp(1.5rem, 4vw, 2rem); }
+
+    .qr-display {
+      background: var(--navy-ink);
+      border-radius: var(--r-lg);
+      padding: 1.75rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+
+    /* Watermark saltire */
+    .qr-display::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cline x1='0' y1='0' x2='200' y2='200' stroke='white' stroke-width='28' stroke-opacity='0.04'/%3E%3Cline x1='200' y1='0' x2='0' y2='200' stroke='white' stroke-width='28' stroke-opacity='0.04'/%3E%3C/svg%3E") center/cover;
+      pointer-events: none;
+    }
+
+    .qr-label {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45); margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .qr-img-wrap {
+      background: var(--cream);
+      display: inline-block;
+      border-radius: var(--r-md); padding: 0.5rem;
+      position: relative;
+    }
+
+    #successQrImg {
+      width: 180px; height: 180px;
+      display: block; border-radius: 8px;
+    }
+
+    .qr-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.1rem; font-weight: 700;
+      color: #fff; margin-top: 0.75rem; position: relative;
+    }
+
+    .qr-sub {
+      font-size: 0.8rem; color: rgba(255,255,255,0.5);
+      position: relative;
+    }
+
+    .next-steps {
+      list-style: none; padding: 0; margin: 0 0 1.5rem;
+    }
+
+    .next-steps li {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--cream-deep);
+      font-size: 0.9rem; color: var(--ink-soft);
+      line-height: 1.4;
+    }
+
+    .next-steps li:last-child { border-bottom: none; }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--navy); color: #fff;
+      font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 0.05rem;
+    }
+
+    .btn-portal {
+      width: 100%; padding: 0.9rem 1.5rem;
+      background: var(--navy); color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      border: none; border-radius: var(--r-pill);
+      cursor: pointer; text-decoration: none;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .btn-portal:hover { background: var(--navy-deep); }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(10,26,47,0.25);
+      border-top-color: var(--navy-ink);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ── Step 1: Register ─────────────────────────────────────────── -->
+  <div id="stepRegister">
+
+    <a href="/" class="logo">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <line x1="2" y1="2" x2="28" y2="28" stroke="#024C97" stroke-width="5" stroke-linecap="round"/>
+        <line x1="28" y1="2" x2="2" y2="28" stroke="#024C97" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="logo-text">SALTIRE</div>
+        <div class="logo-sub">soft play</div>
+      </div>
+    </a>
+
+    <h1>Join the loyalty card</h1>
+    <p class="subtitle">Collect 8 stamps, get a free visit. Plus birthday surprises for your kids.</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <form id="registerForm" novalidate>
+      <div class="name-row">
+        <div>
+          <label for="firstName">First name</label>
+          <input type="text" id="firstName" name="firstName" placeholder="Sarah" autocomplete="given-name" required />
+        </div>
+        <div>
+          <label for="lastName">Last name</label>
+          <input type="text" id="lastName" name="lastName" placeholder="McAllister" autocomplete="family-name" required />
+        </div>
+      </div>
+
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" placeholder="sarah@example.com" autocomplete="email" />
+
+      <label for="phone">Mobile number</label>
+      <input type="tel" id="phone" name="phone" placeholder="+44 7700 900000" autocomplete="tel" inputmode="tel" required />
+
+      <label for="password">Create a password</label>
+      <input type="password" id="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" required />
+      <p class="password-hint">You'll use this to log in to your loyalty account.</p>
+
+      <!-- Hidden referral code field — populated from URL param if present -->
+      <input type="hidden" id="referredBy" name="referredBy" />
+
+      <button type="submit" class="btn-primary" id="submitBtn">
+        <span id="btnText">Create my card</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </form>
+
+    <div class="already-member">
+      Already a member? <a href="/portal/login.html">Log in</a>
+    </div>
+
+  </div>
+
+  <!-- ── Step 2: Success + QR ────────────────────────────────────── -->
+  <div id="stepSuccess">
+
+    <div class="success-header">
+      <div class="success-icon">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
+      <h1>You're in, <span id="successName">friend</span>!</h1>
+      <p class="subtitle" style="margin-bottom:0">Your loyalty card is ready. Show this QR every visit to collect stamps.</p>
+    </div>
+
+    <div class="qr-display">
+      <div class="qr-label">Your personal QR code</div>
+      <div class="qr-img-wrap">
+        <img id="successQrImg" src="" alt="Your loyalty QR code" />
+      </div>
+      <div class="qr-name" id="successCardName">—</div>
+      <div class="qr-sub">Screenshot this and keep it handy</div>
+    </div>
+
+    <ul class="next-steps">
+      <li>
+        <div class="step-num">1</div>
+        <span>Show your QR code at the door on every visit — staff will scan it to add a stamp.</span>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <span>After 8 stamps, you'll get a free visit. Your loyalty card lives in your member portal.</span>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <span>Add your kids' birthdays in the portal and we'll send you a wee surprise when they come around.</span>
+      </li>
+    </ul>
+
+    <a href="/portal/dashboard.html" class="btn-portal">Go to my loyalty card →</a>
+
+  </div>
+
+</div>
+
+<script>
+  // Pre-fill referral code from URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('ref')) {
+    document.getElementById('referredBy').value = params.get('ref');
+  }
+
+  const form      = document.getElementById('registerForm');
+  const errorMsg  = document.getElementById('errorMsg');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText   = document.getElementById('btnText');
+  const spinner   = document.getElementById('spinner');
+
+  function setLoading(loading) {
+    submitBtn.disabled  = loading;
+    btnText.textContent = loading ? 'Setting up your card…' : 'Create my card';
+    spinner.style.display = loading ? 'block' : 'none';
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('visible');
+    errorMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.classList.remove('visible');
+    setLoading(true);
+
+    const payload = {
+      firstName:  document.getElementById('firstName').value.trim(),
+      lastName:   document.getElementById('lastName').value.trim(),
+      email:      document.getElementById('email').value.trim(),
+      phone:      document.getElementById('phone').value.trim(),
+      password:   document.getElementById('password').value,
+      referredBy: document.getElementById('referredBy').value || undefined,
+    };
+
+    if (!payload.firstName || !payload.phone || !payload.password) {
+      showError('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
+
+    if (payload.password.length < 8) {
+      showError('Password must be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res  = await fetch('/api/join', {
+        method:      'POST',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body:        JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.alreadyMember) {
+          showError('An account already exists for this number. Log in instead.');
+        } else {
+          showError(data.error || 'Something went wrong — please try again');
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Show success screen
+      document.getElementById('successName').textContent     = data.firstName;
+      document.getElementById('successCardName').textContent = `${payload.firstName} ${payload.lastName}`.trim();
+      document.getElementById('successQrImg').src            = data.qrUrl;
+
+      document.getElementById('stepRegister').style.display = 'none';
+      document.getElementById('stepSuccess').style.display  = 'block';
+
+      // Auto-log them in
+      await fetch('/api/auth/login', {
+        method:      'POST',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body:        JSON.stringify({ phone: payload.phone, password: payload.password }),
+      });
+
+    } catch {
+      showError('Connection error — please try again');
+      setLoading(false);
+    }
+  });
+</script>
+
+</body>
+</html>

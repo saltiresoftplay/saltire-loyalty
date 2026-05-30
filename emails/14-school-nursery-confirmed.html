@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group visit confirmed &mdash; Saltire Soft Play</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f0;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f0;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:6px;overflow:hidden;">
+          <tr>
+            <td style="background-color:#024C97;padding:28px 40px;text-align:center;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td style="padding-right:12px;vertical-align:middle;"><svg width="36" height="26" viewBox="0 0 30 22" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="22" fill="#024C97"/><path d="M0,0 L30,22 M30,0 L0,22" stroke="#ffffff" stroke-width="4"/></svg></td>
+                  <td style="vertical-align:middle;text-align:left;">
+                    <span style="display:block;font-size:22px;font-weight:900;letter-spacing:0.08em;color:#ffffff;text-transform:uppercase;line-height:1;">SALTIRE</span>
+                    <span style="display:block;font-size:10px;font-weight:400;letter-spacing:0.2em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-top:2px;">soft play</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#e8f2e8;padding:16px 40px;text-align:center;border-bottom:1px solid #c8e0c8;">
+              <p style="margin:0;font-size:14px;font-weight:700;color:#2a6b2a;letter-spacing:0.05em;text-transform:uppercase;">&#10003;&nbsp; Group Visit Confirmed</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#222;">Hi {{contact.first_name}},</p>
+              <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#222;">That is all confirmed. Here are the details:</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f0;border-radius:6px;margin:0 0 28px;">
+                <tr>
+                  <td style="padding:24px;">
+                    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#024C97;">Group Visit</p>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="4">
+                      <tr>
+                        <td style="font-size:13px;color:#666;padding:4px 0;width:150px;">Organisation</td>
+                        <td style="font-size:14px;color:#222;font-weight:600;padding:4px 0;">{{contact.school_nursery_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;color:#666;padding:4px 0;">Date</td>
+                        <td style="font-size:14px;color:#222;font-weight:600;padding:4px 0;">{{contact.party_date}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;color:#666;padding:4px 0;">Arrival time</td>
+                        <td style="font-size:14px;color:#222;font-weight:600;padding:4px 0;">{{contact.party_start_time}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;color:#666;padding:4px 0;">Number of children</td>
+                        <td style="font-size:14px;color:#222;font-weight:600;padding:4px 0;">{{contact.party_children_count}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;color:#666;padding:4px 0;">Age range</td>
+                        <td style="font-size:14px;color:#222;font-weight:600;padding:4px 0;">{{contact.group_age_range}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#222;">Please make sure all accompanying adults are aware that children must be supervised at all times. Our staff will be on hand throughout.</p>
+              <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#222;">If your numbers change or you need to get in touch before the visit, please call us on <a href="tel:01316601111" style="color:#024C97;text-decoration:none;font-weight:700;">0131 660 1111</a>.</p>
+              <p style="margin:0 0 8px;font-size:15px;line-height:1.6;color:#222;">We are looking forward to welcoming everyone.</p>
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#222;">Warm regards,<br/><strong>Saltire Soft Play</strong></p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f4f4f0;padding:24px 40px;text-align:center;border-top:1px solid #e8e8e0;">
+              <p style="margin:0 0 4px;font-size:13px;color:#444;"><strong>Saltire Soft Play</strong></p>
+              <p style="margin:0 0 4px;font-size:12px;color:#666;">Unit 1, Mayfield Industrial Estate, Mayfield, EH22 4AD</p>
+              <p style="margin:0 0 4px;font-size:12px;color:#666;"><a href="tel:01316601111" style="color:#024C97;text-decoration:none;">0131 660 1111</a> &nbsp;&middot;&nbsp; <a href="mailto:{{location.email}}" style="color:#024C97;text-decoration:none;">{{location.email}}</a></p>
+              <p style="margin:8px 0 0;font-size:11px;color:#999;">Open 7 days &middot; 9.00am &ndash; 5.30pm</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Scanner — Saltire Soft Play</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800&family=Outfit:wght@300;400;500;600;700&display=swap">
+  <!-- ZXing QR reader -->
+  <script src="https://unpkg.com/@zxing/browser@0.1.4/umd/index.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+
+    :root {
+      --navy:      #024C97;
+      --navy-deep: #013265;
+      --navy-ink:  #061A38;
+      --cream:     #FFF6E6;
+      --yellow:    #FFC53D;
+      --green:     #4FB477;
+      --red:       #E63946;
+      --orange:    #F4843D;
+      --ink:       #0A1A2F;
+      --ink-soft:  #3B4A60;
+      --ink-mute:  #6B7A91;
+      --r-md:      22px;
+      --r-lg:      32px;
+      --r-pill:    999px;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--navy-ink);
+      min-height: 100dvh;
+      display: flex; flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── PIN screen ─────────────────────────────────────────── */
+    #pinScreen {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100dvh; width: 100%;
+      padding: 2rem;
+    }
+
+    .pin-card {
+      background: #0D2545;
+      border-radius: var(--r-lg);
+      padding: 2.5rem 2rem;
+      width: 100%; max-width: 360px;
+      text-align: center;
+    }
+
+    .pin-logo {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .pin-logo-text {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.4rem; font-weight: 700;
+      color: #fff; letter-spacing: -0.02em;
+    }
+
+    .pin-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: #fff; margin: 0 0 0.4rem;
+    }
+
+    .pin-sub {
+      color: rgba(255,255,255,0.5); font-size: 0.875rem;
+      margin: 0 0 2rem;
+    }
+
+    .pin-dots {
+      display: flex; gap: 0.75rem;
+      justify-content: center; margin-bottom: 2rem;
+    }
+
+    .pin-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .pin-dot.filled {
+      background: var(--yellow);
+      border-color: var(--yellow);
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.6rem;
+    }
+
+    .pin-key {
+      background: rgba(255,255,255,0.08);
+      border: none; border-radius: var(--r-md);
+      color: #fff; font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem; font-weight: 600;
+      padding: 1rem; cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      aspect-ratio: 1;
+    }
+
+    .pin-key:hover  { background: rgba(255,255,255,0.14); }
+    .pin-key:active { transform: scale(0.93); background: rgba(255,255,255,0.2); }
+    .pin-key.delete { font-size: 1rem; color: rgba(255,255,255,0.6); }
+
+    .pin-error {
+      color: var(--red); font-size: 0.85rem;
+      margin-top: 1rem; min-height: 1.2em;
+      font-weight: 500;
+    }
+
+    /* ── Scanner screen ─────────────────────────────────────── */
+    #scannerScreen { display: none; width: 100%; flex-direction: column; }
+
+    /* Header */
+    .scan-header {
+      background: var(--navy-ink);
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .scan-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1rem; font-weight: 700; color: #fff;
+    }
+
+    .btn-lock {
+      background: rgba(255,255,255,0.1);
+      border: none; border-radius: var(--r-pill);
+      color: rgba(255,255,255,0.6);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem; font-weight: 500;
+      padding: 0.4rem 0.9rem; cursor: pointer;
+    }
+
+    /* Camera viewport */
+    .camera-wrap {
+      position: relative;
+      width: 100%; max-width: 500px;
+      margin: 0 auto;
+    }
+
+    #videoEl {
+      width: 100%; display: block;
+      background: #000;
+    }
+
+    .scan-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+
+    .scan-frame {
+      width: 65%; aspect-ratio: 1;
+      border: 3px solid rgba(255, 197, 61, 0.85);
+      border-radius: 16px;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.35);
+      position: relative;
+    }
+
+    .scan-line {
+      position: absolute; left: 0; right: 0; top: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--yellow), transparent);
+      animation: scanLine 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scanLine {
+      0%   { top: 4px;  opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { top: calc(100% - 4px); opacity: 0; }
+    }
+
+    .scan-hint {
+      position: absolute; bottom: 1rem; left: 0; right: 0;
+      text-align: center;
+      color: rgba(255,255,255,0.7); font-size: 0.85rem;
+    }
+
+    /* Result panel */
+    .result-panel {
+      max-width: 500px; width: 100%; margin: 0 auto;
+      padding: 1.25rem;
+      display: none;
+    }
+
+    .result-panel.visible { display: block; }
+
+    .member-card {
+      background: #0D2545;
+      border-radius: var(--r-lg);
+      padding: 1.5rem;
+      color: #fff;
+    }
+
+    .member-top {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .member-avatar {
+      width: 52px; height: 52px;
+      background: var(--navy);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.3rem; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+
+    .member-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.3rem; font-weight: 700; color: #fff;
+      margin: 0 0 0.15rem;
+    }
+
+    .member-sub {
+      font-size: 0.825rem; color: rgba(255,255,255,0.5);
+    }
+
+    /* Mini stamp display */
+    .mini-stamps {
+      display: grid; grid-template-columns: repeat(8, 1fr);
+      gap: 6px; margin-bottom: 1.25rem;
+    }
+
+    .mini-stamp {
+      aspect-ratio: 1; border-radius: 50%;
+      border: 2px dashed rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .mini-stamp.filled {
+      background: var(--navy);
+      border: 2px solid rgba(255,255,255,0.35);
+    }
+
+    .mini-saltire {
+      width: 70%; height: 70%;
+    }
+
+    /* Action buttons */
+    .action-btns { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .btn-stamp {
+      width: 100%; padding: 1rem;
+      background: var(--yellow); color: var(--navy-ink);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      border: none; border-radius: var(--r-pill);
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-stamp:hover  { background: #ffb800; }
+    .btn-stamp:active { transform: scale(0.97); }
+    .btn-stamp:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-redeem {
+      width: 100%; padding: 1rem;
+      background: var(--green); color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      border: none; border-radius: var(--r-pill);
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      display: none;
+    }
+
+    .btn-redeem.visible { display: block; }
+    .btn-redeem:hover   { background: #3a9960; }
+    .btn-redeem:active  { transform: scale(0.97); }
+
+    .btn-scan-again {
+      width: 100%; padding: 0.8rem;
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem; font-weight: 500;
+      border: none; border-radius: var(--r-pill); cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-scan-again:hover { background: rgba(255,255,255,0.13); }
+
+    /* Status messages */
+    .status-msg {
+      text-align: center; font-size: 0.875rem;
+      font-weight: 500; min-height: 1.4em;
+      margin-top: 0.75rem; padding: 0.75rem;
+      border-radius: var(--r-md);
+      display: none;
+    }
+
+    .status-msg.ok  { background: rgba(79,180,119,0.15); color: var(--green); display: block; }
+    .status-msg.err { background: rgba(230,57,70,0.15);  color: var(--red);   display: block; }
+    .status-msg.warn { background: rgba(244,132,61,0.15); color: var(--orange); display: block; }
+
+    /* Cooldown badge */
+    .cooldown-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: rgba(244,132,61,0.15);
+      color: var(--orange); font-size: 0.775rem; font-weight: 600;
+      padding: 0.25rem 0.6rem; border-radius: var(--r-pill);
+    }
+  </style>
+</head>
+<body>
+
+<!-- PIN screen -->
+<div id="pinScreen">
+  <div class="pin-card">
+    <div class="pin-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <line x1="2" y1="2" x2="26" y2="26" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="26" y1="2" x2="2" y2="26" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+      </svg>
+      <span class="pin-logo-text">SALTIRE Staff</span>
+    </div>
+    <h1 class="pin-title">Enter PIN</h1>
+    <p class="pin-sub">Staff access only</p>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" data-pos="0"></div>
+      <div class="pin-dot" data-pos="1"></div>
+      <div class="pin-dot" data-pos="2"></div>
+      <div class="pin-dot" data-pos="3"></div>
+    </div>
+    <div class="pin-keypad" id="pinKeypad">
+      <button class="pin-key" data-val="1">1</button>
+      <button class="pin-key" data-val="2">2</button>
+      <button class="pin-key" data-val="3">3</button>
+      <button class="pin-key" data-val="4">4</button>
+      <button class="pin-key" data-val="5">5</button>
+      <button class="pin-key" data-val="6">6</button>
+      <button class="pin-key" data-val="7">7</button>
+      <button class="pin-key" data-val="8">8</button>
+      <button class="pin-key" data-val="9">9</button>
+      <button class="pin-key delete" data-val="clear">⌫</button>
+      <button class="pin-key" data-val="0">0</button>
+      <button class="pin-key" data-val="back">←</button>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+</div>
+
+<!-- Scanner screen -->
+<div id="scannerScreen">
+  <div class="scan-header">
+    <span class="scan-title">Saltire Scanner</span>
+    <button class="btn-lock" id="lockBtn">🔒 Lock</button>
+  </div>
+
+  <div class="camera-wrap">
+    <video id="videoEl" autoplay playsinline muted></video>
+    <div class="scan-overlay">
+      <div class="scan-frame">
+        <div class="scan-line"></div>
+      </div>
+    </div>
+    <div class="scan-hint">Point camera at member's QR code</div>
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="member-card">
+      <div class="member-top">
+        <div class="member-avatar" id="memberAvatar">?</div>
+        <div>
+          <div class="member-name" id="memberName">—</div>
+          <div class="member-sub" id="memberSub">—</div>
+        </div>
+      </div>
+
+      <div class="mini-stamps" id="miniStamps"></div>
+
+      <div class="action-btns">
+        <button class="btn-stamp"   id="stampBtn">Add stamp</button>
+        <button class="btn-redeem"  id="redeemBtn">Redeem free visit ✓</button>
+        <button class="btn-scan-again" id="scanAgainBtn">Scan another member</button>
+      </div>
+
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── PIN logic ──────────────────────────────────────────────────────
+  let pinBuffer  = '';
+  let staffPin   = null; // fetched or entered
+
+  async function fetchPinLength() {
+    // We don't expose the PIN itself — just ask server to validate
+    // PIN lives only on server. We send with every API call via header.
+  }
+
+  function updatePinDots() {
+    document.querySelectorAll('.pin-dot').forEach((dot, i) => {
+      dot.classList.toggle('filled', i < pinBuffer.length);
+    });
+  }
+
+  document.getElementById('pinKeypad').addEventListener('click', async (e) => {
+    const key = e.target.closest('.pin-key');
+    if (!key) return;
+    const val = key.dataset.val;
+
+    if (val === 'back') {
+      pinBuffer = pinBuffer.slice(0, -1);
+    } else if (val === 'clear') {
+      pinBuffer = '';
+    } else if (pinBuffer.length < 6) {
+      pinBuffer += val;
+    }
+
+    updatePinDots();
+
+    // Validate once 4+ digits entered and no more input for 300ms
+    if (pinBuffer.length >= 4) {
+      clearTimeout(window._pinTimer);
+      window._pinTimer = setTimeout(() => validatePin(), 300);
+    }
+
+    document.getElementById('pinError').textContent = '';
+  });
+
+  async function validatePin() {
+    // Test PIN against the server by doing a lightweight call
+    const res = await fetch(`/api/scanner/member/ping`, {
+      headers: { 'X-Scanner-Pin': pinBuffer }
+    });
+
+    if (res.status === 401) {
+      document.getElementById('pinError').textContent = 'Incorrect PIN — try again';
+      pinBuffer = '';
+      updatePinDots();
+      return;
+    }
+
+    // PIN accepted (even a 404 on /ping means PIN was valid)
+    staffPin = pinBuffer;
+    pinBuffer = '';
+    document.getElementById('pinScreen').style.display    = 'none';
+    document.getElementById('scannerScreen').style.display = 'flex';
+    startScanner();
+  }
+
+  document.getElementById('lockBtn').addEventListener('click', () => {
+    stopScanner();
+    staffPin  = null;
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('scannerScreen').style.display = 'none';
+    document.getElementById('pinScreen').style.display     = 'flex';
+    hideResult();
+  });
+
+  // ── QR Scanner ────────────────────────────────────────────────────
+  let codeReader   = null;
+  let scanning     = true;
+  let currentId    = null;
+
+  function startScanner() {
+    if (!window.ZXingBrowser) {
+      alert('QR library failed to load — please refresh');
+      return;
+    }
+
+    codeReader = new ZXingBrowser.BrowserQRCodeReader();
+    const videoEl = document.getElementById('videoEl');
+
+    codeReader.decodeFromVideoDevice(null, videoEl, (result, err) => {
+      if (!scanning) return;
+      if (result) {
+        const text = result.getText();
+        const contactId = extractContactId(text);
+        if (contactId && contactId !== currentId) {
+          scanning = false;
+          currentId = contactId;
+          loadMember(contactId);
+        }
+      }
+    });
+  }
+
+  function stopScanner() {
+    if (codeReader) {
+      codeReader.reset();
+      codeReader = null;
+    }
+  }
+
+  function extractContactId(text) {
+    // Supports: full URL like https://saltirecentre.co.uk/portal/dashboard.html?id=XXXX
+    // or bare contact ID
+    try {
+      const url = new URL(text);
+      return url.searchParams.get('id') || null;
+    } catch {
+      // Not a URL — treat as raw contact ID if looks valid
+      return text.match(/^[a-zA-Z0-9]{10,}$/) ? text : null;
+    }
+  }
+
+  // ── Member display ────────────────────────────────────────────────
+  function initials(name) {
+    return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  function buildMiniStamps(count, required) {
+    const grid = document.getElementById('miniStamps');
+    grid.innerHTML = '';
+    for (let i = 1; i <= required; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'mini-stamp' + (i <= count ? ' filled' : '');
+      if (i <= count) {
+        cell.innerHTML = `
+          <svg class="mini-saltire" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="10" x2="90" y2="90" stroke="white" stroke-width="24" stroke-linecap="round"/>
+            <line x1="90" y1="10" x2="10" y2="90" stroke="white" stroke-width="24" stroke-linecap="round"/>
+          </svg>`;
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  async function loadMember(contactId) {
+    showStatus('', '');
+    document.getElementById('stampBtn').disabled = true;
+
+    try {
+      const res  = await fetch(`/api/scanner/member/${contactId}`, {
+        headers: { 'X-Scanner-Pin': staffPin }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(data.error || 'Could not load member', 'err');
+        showResult();
+        return;
+      }
+
+      document.getElementById('memberAvatar').textContent = initials(data.name);
+      document.getElementById('memberName').textContent   = data.name;
+      document.getElementById('memberSub').textContent    =
+        `${data.stampCount} of ${data.stampsRequired} stamps` +
+        (data.lastVisit ? ` · Last visit ${new Date(data.lastVisit).toLocaleDateString('en-GB', {day:'numeric',month:'short'})}` : '');
+
+      buildMiniStamps(data.stampCount, data.stampsRequired);
+
+      const stampBtn  = document.getElementById('stampBtn');
+      const redeemBtn = document.getElementById('redeemBtn');
+
+      if (data.rewardReady) {
+        stampBtn.disabled = true;
+        redeemBtn.classList.add('visible');
+        showStatus('🎉 Free visit ready — press Redeem!', 'ok');
+      } else if (data.cooldownActive) {
+        stampBtn.disabled = true;
+        showStatus('Already stamped today — cooldown active', 'warn');
+      } else {
+        stampBtn.disabled = false;
+        redeemBtn.classList.remove('visible');
+      }
+
+      currentId = contactId;
+      showResult();
+
+    } catch (err) {
+      showStatus('Connection error — try again', 'err');
+      showResult();
+    }
+  }
+
+  // ── Stamp action ──────────────────────────────────────────────────
+  document.getElementById('stampBtn').addEventListener('click', async () => {
+    document.getElementById('stampBtn').disabled = true;
+    showStatus('Adding stamp…', '');
+
+    const res  = await fetch('/api/scanner/stamp', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Scanner-Pin': staffPin },
+      body:    JSON.stringify({ contactId: currentId }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(data.error || 'Failed to add stamp', 'err');
+      if (data.cooldownActive) showStatus(data.error, 'warn');
+      return;
+    }
+
+    buildMiniStamps(data.stampCount, data.stampsRequired);
+    document.getElementById('memberSub').textContent = `${data.stampCount} of ${data.stampsRequired} stamps`;
+
+    if (data.rewardReady) {
+      document.getElementById('redeemBtn').classList.add('visible');
+      showStatus(`🎉 ${data.name} has earned a free visit!`, 'ok');
+    } else {
+      showStatus(`Stamp added! ${data.stampCount} of ${data.stampsRequired}`, 'ok');
+    }
+  });
+
+  // ── Redeem action ─────────────────────────────────────────────────
+  document.getElementById('redeemBtn').addEventListener('click', async () => {
+    if (!confirm(`Confirm free visit redemption for ${document.getElementById('memberName').textContent}?`)) return;
+
+    document.getElementById('redeemBtn').disabled = true;
+    const res  = await fetch('/api/scanner/redeem', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Scanner-Pin': staffPin },
+      body:    JSON.stringify({ contactId: currentId }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(data.error || 'Redemption failed', 'err');
+      document.getElementById('redeemBtn').disabled = false;
+      return;
+    }
+
+    document.getElementById('redeemBtn').classList.remove('visible');
+    buildMiniStamps(0, 8);
+    showStatus(`✓ Free visit redeemed for ${data.name}. Enjoy!`, 'ok');
+  });
+
+  // ── Scan again ────────────────────────────────────────────────────
+  document.getElementById('scanAgainBtn').addEventListener('click', () => {
+    hideResult();
+    currentId = null;
+    scanning  = true;
+  });
+
+  // ── UI helpers ────────────────────────────────────────────────────
+  function showResult()  { document.getElementById('resultPanel').classList.add('visible'); }
+  function hideResult()  {
+    document.getElementById('resultPanel').classList.remove('visible');
+    document.getElementById('stampBtn').disabled = false;
+    document.getElementById('redeemBtn').classList.remove('visible');
+    document.getElementById('redeemBtn').disabled = false;
+    showStatus('', '');
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className   = 'status-msg' + (type ? ` ${type}` : '');
+  }
+</script>
+
+</body>
+</html>

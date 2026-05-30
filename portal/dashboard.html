@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Loyalty Card — Saltire Soft Play</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=Outfit:wght@300;400;500;600;700&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #024C97;
+      --navy-deep: #013265;
+      --navy-ink:  #061A38;
+      --cream:     #FFF6E6;
+      --cream-deep:#F6E9CC;
+      --paper:     #FFFCF5;
+      --white:     #FFFFFF;
+      --yellow:    #FFC53D;
+      --green:     #4FB477;
+      --red:       #E63946;
+      --ink:       #0A1A2F;
+      --ink-soft:  #3B4A60;
+      --ink-mute:  #6B7A91;
+      --r-sm:      12px;
+      --r-md:      22px;
+      --r-lg:      32px;
+      --r-pill:    999px;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100dvh;
+    }
+
+    /* ── Loading overlay ──────────────────────────────────── */
+    #loadingOverlay {
+      position: fixed; inset: 0;
+      background: var(--navy-ink);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      transition: opacity 0.3s;
+    }
+
+    #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+
+    .loading-logo {
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    }
+
+    .loading-cross {
+      width: 48px; height: 48px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    /* ── Top nav ───────────────────────────────────────────── */
+    header {
+      background: var(--navy-ink);
+      padding: 1rem clamp(1.25rem, 4vw, 2rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .logo-cross { width: 28px; height: 28px; }
+
+    .logo-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--white); letter-spacing: -0.02em;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-ghost {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      background: none; border: none; cursor: pointer;
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--r-pill);
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .btn-ghost:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    /* ── Main layout ───────────────────────────────────────── */
+    main {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem);
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    /* ── Greeting ──────────────────────────────────────────── */
+    .greeting h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700; color: var(--navy-ink);
+      margin: 0 0 0.25rem; line-height: 1.15;
+    }
+
+    .greeting p { color: var(--ink-soft); margin: 0; font-size: 0.95rem; }
+
+    /* ── Reward banner ─────────────────────────────────────── */
+    .reward-banner {
+      background: var(--yellow);
+      border-radius: var(--r-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      display: none;
+    }
+
+    .reward-banner.visible { display: flex; }
+
+    .reward-icon { font-size: 2rem; flex-shrink: 0; }
+
+    .reward-banner h2 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--navy-ink); margin: 0 0 0.2rem;
+    }
+
+    .reward-banner p { color: var(--navy); margin: 0; font-size: 0.875rem; font-weight: 500; }
+
+    /* ── Loyalty card ──────────────────────────────────────── */
+    .loyalty-card {
+      background: var(--navy-ink);
+      border-radius: var(--r-lg);
+      padding: clamp(1.5rem, 4vw, 2.25rem);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle saltire watermark */
+    .loyalty-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cline x1='0' y1='0' x2='200' y2='200' stroke='white' stroke-width='28' stroke-opacity='0.04'/%3E%3Cline x1='200' y1='0' x2='0' y2='200' stroke='white' stroke-width='28' stroke-opacity='0.04'/%3E%3C/svg%3E") center/cover;
+      pointer-events: none;
+    }
+
+    .card-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1.5rem; position: relative;
+    }
+
+    .card-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.5);
+      margin-bottom: 0.3rem;
+    }
+
+    .card-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--white);
+      line-height: 1.1;
+    }
+
+    .stamp-progress {
+      text-align: right;
+    }
+
+    .stamp-count-big {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 2.5rem; font-weight: 800; color: var(--yellow);
+      line-height: 1;
+    }
+
+    .stamp-count-label {
+      font-size: 0.7rem; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    /* ── Stamp grid ─────────────────────────────────────────── */
+    .stamp-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(0.6rem, 2vw, 0.875rem);
+      position: relative;
+    }
+
+    .stamp {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2.5px dashed rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .stamp.filled {
+      border: 2.5px solid rgba(255,255,255,0.4);
+      background: var(--navy);
+    }
+
+    .stamp.filled .saltire-svg {
+      display: block;
+    }
+
+    .stamp .saltire-svg { display: none; }
+
+    /* Scotland flag (Saltire) in a circle */
+    .saltire-svg {
+      width: 72%; height: 72%;
+    }
+
+    /* ── Stamp animation ─────────────────────────────────────── */
+    @keyframes stampPress {
+      0%   { transform: scale(2.2) rotate(-18deg); opacity: 0; filter: blur(6px); }
+      45%  { transform: scale(0.9) rotate(3deg);   opacity: 1; filter: blur(0); }
+      65%  { transform: scale(1.08) rotate(-2deg); }
+      80%  { transform: scale(0.97) rotate(1deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes inkSpread {
+      0%   { box-shadow: 0 0 0 0 rgba(2,76,151,0.7); }
+      70%  { box-shadow: 0 0 0 12px rgba(2,76,151,0); }
+      100% { box-shadow: 0 0 0 0 rgba(2,76,151,0); }
+    }
+
+    @keyframes fadeStamp {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .stamp.animate-new {
+      animation: inkSpread 0.6s ease-out 0.1s;
+    }
+
+    .stamp.animate-new .saltire-svg {
+      animation: stampPress 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .stamp.animate-existing .saltire-svg {
+      animation: fadeStamp 0.3s ease-out forwards;
+    }
+
+    /* ── QR section ─────────────────────────────────────────── */
+    .qr-section {
+      display: flex; align-items: center; gap: 1rem;
+      margin-top: 1.5rem; padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+    }
+
+    .qr-wrapper {
+      background: var(--cream);
+      border-radius: var(--r-sm);
+      padding: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    .qr-img {
+      width: 80px; height: 80px;
+      display: block; border-radius: 8px;
+    }
+
+    .qr-text h3 {
+      font-size: 0.875rem; font-weight: 700;
+      color: var(--white); margin: 0 0 0.2rem;
+    }
+
+    .qr-text p {
+      font-size: 0.775rem; color: rgba(255,255,255,0.5);
+      margin: 0; line-height: 1.4;
+    }
+
+    /* ── Stat cards ─────────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--r-md);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.6rem; font-weight: 800;
+      color: var(--navy); line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.725rem; font-weight: 600;
+      color: var(--ink-mute); letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── Section card ────────────────────────────────────────── */
+    .section-card {
+      background: var(--white);
+      border-radius: var(--r-lg);
+      padding: clamp(1.25rem, 3vw, 1.75rem);
+    }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.15rem; font-weight: 700;
+      color: var(--navy-ink); margin: 0;
+    }
+
+    .btn-sm {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem; font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--r-pill);
+      cursor: pointer; border: none;
+      transition: background 0.2s;
+    }
+
+    .btn-navy { background: var(--navy); color: #fff; }
+    .btn-navy:hover { background: var(--navy-deep); }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--cream-deep);
+      color: var(--ink-soft);
+    }
+
+    .btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+
+    /* ── Party booking countdown ─────────────────────────────── */
+    .party-countdown {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--cream);
+      border-radius: var(--r-md);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .countdown-icon { font-size: 2rem; flex-shrink: 0; }
+
+    .countdown-days {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 2rem; font-weight: 800;
+      color: var(--navy); line-height: 1;
+    }
+
+    .countdown-label {
+      font-size: 0.8rem; color: var(--ink-mute);
+      font-weight: 500;
+    }
+
+    .party-details { font-size: 0.9rem; color: var(--ink-soft); margin: 0; }
+
+    /* ── Family section ──────────────────────────────────────── */
+    .family-member {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--cream-deep);
+    }
+
+    .family-member:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .family-avatar {
+      width: 38px; height: 38px;
+      background: var(--navy);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700; font-size: 0.9rem;
+      color: var(--white); flex-shrink: 0;
+    }
+
+    .family-info { flex: 1; margin-left: 0.75rem; }
+
+    .family-name {
+      font-weight: 600; font-size: 0.9rem;
+      color: var(--navy-ink);
+    }
+
+    .family-sub {
+      font-size: 0.775rem; color: var(--ink-mute);
+    }
+
+    /* ── Child form ──────────────────────────────────────────── */
+    .child-form { display: none; }
+    .child-form.open { display: block; }
+
+    .child-row {
+      display: grid;
+      grid-template-columns: 1fr 140px 36px;
+      gap: 0.5rem; align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .child-row input {
+      padding: 0.6rem 0.75rem;
+      border: 2px solid var(--cream-deep);
+      border-radius: var(--r-sm);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.875rem; color: var(--navy-ink);
+      outline: none; width: 100%;
+    }
+
+    .child-row input:focus { border-color: var(--navy); }
+
+    .btn-remove {
+      width: 36px; height: 36px;
+      background: #FEE8E9; color: var(--red);
+      border: none; border-radius: var(--r-sm);
+      font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .btn-remove:hover { background: #FFCDD2; }
+
+    .btn-add-child {
+      background: var(--cream);
+      border: 2px dashed var(--cream-deep);
+      color: var(--ink-soft);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      padding: 0.6rem 1rem;
+      border-radius: var(--r-md);
+      cursor: pointer; width: 100%;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 0.25rem;
+    }
+
+    .btn-add-child:hover { border-color: var(--navy); color: var(--navy); }
+
+    /* ── Partner link form ───────────────────────────────────── */
+    .partner-form { display: none; margin-top: 1rem; }
+    .partner-form.open { display: flex; gap: 0.5rem; }
+
+    .partner-form input {
+      flex: 1;
+      padding: 0.65rem 0.9rem;
+      border: 2px solid var(--cream-deep);
+      border-radius: var(--r-md);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem; color: var(--navy-ink);
+      outline: none;
+    }
+
+    .partner-form input:focus { border-color: var(--navy); }
+
+    /* ── Save feedback ───────────────────────────────────────── */
+    .save-msg {
+      font-size: 0.825rem; font-weight: 600;
+      margin-top: 0.75rem; display: none;
+    }
+
+    .save-msg.ok   { color: var(--green);  display: block; }
+    .save-msg.err  { color: var(--red);    display: block; }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--navy-ink); color: var(--white);
+      padding: 0.75rem 1.25rem; border-radius: var(--r-pill);
+      font-size: 0.875rem; font-weight: 500;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.3s; z-index: 200;
+      white-space: nowrap;
+    }
+
+    #toast.visible { opacity: 1; }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+      .stat-value { font-size: 1.3rem; }
+      .stat-label { font-size: 0.65rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay">
+  <div class="loading-logo">
+    <svg class="loading-cross" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="3" y1="3" x2="45" y2="45" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      <line x1="45" y1="3" x2="3" y2="45" stroke="white" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Nav -->
+<header>
+  <a href="/" class="logo">
+    <svg class="logo-cross" viewBox="0 0 28 28" fill="none">
+      <line x1="2" y1="2" x2="26" y2="26" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="26" y1="2" x2="2" y2="26" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+    </svg>
+    <span class="logo-name">SALTIRE</span>
+  </a>
+  <div class="nav-actions">
+    <button class="btn-ghost" id="logoutBtn">Log out</button>
+  </div>
+</header>
+
+<main id="mainContent" style="display:none">
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <h1 id="greetingName">Hey there!</h1>
+    <p id="greetingSub">Your loyalty card is looking great.</p>
+  </div>
+
+  <!-- Reward ready banner -->
+  <div class="reward-banner" id="rewardBanner">
+    <div class="reward-icon">🎉</div>
+    <div>
+      <h2>Free visit unlocked!</h2>
+      <p>Show this screen at the door — staff will scan and confirm your free visit.</p>
+    </div>
+  </div>
+
+  <!-- Loyalty card -->
+  <div class="loyalty-card">
+    <div class="card-top">
+      <div>
+        <div class="card-label">Loyalty Card</div>
+        <div class="card-name" id="cardName">—</div>
+      </div>
+      <div class="stamp-progress">
+        <div class="stamp-count-big" id="stampCountBig">0</div>
+        <div class="stamp-count-label">of 8 stamps</div>
+      </div>
+    </div>
+
+    <!-- 8 stamp circles -->
+    <div class="stamp-grid" id="stampGrid">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- QR code -->
+    <div class="qr-section">
+      <div class="qr-wrapper">
+        <img class="qr-img" id="qrImg" src="" alt="Your personal QR code" />
+      </div>
+      <div class="qr-text">
+        <h3>Your entry QR</h3>
+        <p>Staff scan this each visit to add your stamp. Keep it handy!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="statVisits">0</div>
+      <div class="stat-label">Total visits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statRewards">0</div>
+      <div class="stat-label">Free visits earned</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statMemberSince">—</div>
+      <div class="stat-label">Member since</div>
+    </div>
+  </div>
+
+  <!-- Party booking (hidden until data loads) -->
+  <div class="section-card" id="partySection" style="display:none">
+    <div class="section-header">
+      <h2 class="section-title">🎂 Upcoming Party</h2>
+      <button class="btn-sm btn-outline">Manage</button>
+    </div>
+    <div class="party-countdown">
+      <div class="countdown-icon">🎈</div>
+      <div>
+        <div class="countdown-days" id="countdownDays">—</div>
+        <div class="countdown-label">days to go</div>
+      </div>
+    </div>
+    <p class="party-details" id="partyDetails">—</p>
+  </div>
+
+  <!-- Family section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">Family</h2>
+    </div>
+
+    <!-- Partner -->
+    <div id="partnerArea">
+      <div class="family-member" id="partnerDisplay" style="display:none">
+        <div class="family-avatar" id="partnerAvatar">?</div>
+        <div class="family-info">
+          <div class="family-name" id="partnerName">—</div>
+          <div class="family-sub">Partner — shared loyalty balance</div>
+        </div>
+      </div>
+      <div id="addPartnerArea">
+        <button class="btn-sm btn-outline" id="addPartnerBtn">+ Link partner</button>
+        <div class="partner-form" id="partnerForm">
+          <input type="tel" id="partnerPhone" placeholder="Partner's mobile number" inputmode="tel" />
+          <button class="btn-sm btn-navy" id="linkPartnerBtn">Link</button>
+        </div>
+        <div class="save-msg" id="partnerMsg"></div>
+      </div>
+    </div>
+
+    <!-- Children -->
+    <div style="margin-top:1.25rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+        <span style="font-weight:600;font-size:0.9rem;color:var(--ink)">Children</span>
+        <button class="btn-sm btn-outline" id="editChildrenBtn">Edit</button>
+      </div>
+
+      <div id="childrenDisplay"></div>
+
+      <div class="child-form" id="childForm">
+        <div id="childRows"></div>
+        <button class="btn-add-child" id="addChildRowBtn" style="display:none">+ Add another child</button>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn-sm btn-navy" id="saveChildrenBtn">Save</button>
+          <button class="btn-sm btn-outline" id="cancelChildrenBtn">Cancel</button>
+        </div>
+        <div class="save-msg" id="childrenMsg"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<!-- Inline Scotland flag SVG template -->
+<template id="saltirelSvg">
+  <svg class="saltire-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <line x1="8" y1="8" x2="92" y2="92" stroke="white" stroke-width="22" stroke-linecap="round"/>
+    <line x1="92" y1="8" x2="8" y2="92" stroke="white" stroke-width="22" stroke-linecap="round"/>
+  </svg>
+</template>
+
+<script>
+  // ── Utilities ────────────────────────────────────────────────────────
+  function toast(msg, duration = 2800) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('visible');
+    setTimeout(() => el.classList.remove('visible'), duration);
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+  }
+
+  function daysUntil(iso) {
+    if (!iso) return null;
+    const diff = new Date(iso) - new Date();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }
+
+  function initials(name) {
+    return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  // ── Build stamp grid ─────────────────────────────────────────────────
+  function buildStampGrid(stampCount, prevCount) {
+    const grid     = document.getElementById('stampGrid');
+    const template = document.getElementById('saltirelSvg');
+    grid.innerHTML = '';
+
+    for (let i = 1; i <= 8; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'stamp';
+
+      if (i <= stampCount) {
+        cell.classList.add('filled');
+        const svgClone = template.content.cloneNode(true);
+
+        if (i > prevCount) {
+          // New stamp — full press animation, staggered
+          cell.classList.add('animate-new');
+          const delay = (i - prevCount - 1) * 120;
+          cell.style.animationDelay      = `${delay}ms`;
+          svgClone.querySelector('svg').style.animationDelay = `${delay}ms`;
+        } else {
+          // Existing stamp — gentle fade
+          cell.classList.add('animate-existing');
+          const delay = (i - 1) * 50;
+          svgClone.querySelector('svg').style.animationDelay = `${delay}ms`;
+        }
+
+        cell.appendChild(svgClone);
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  // ── Render member data ───────────────────────────────────────────────
+  function renderMember(data) {
+    const prevCount = parseInt(sessionStorage.getItem('stamp_count') || '0', 10);
+    sessionStorage.setItem('stamp_count', data.stampCount);
+
+    // Greeting
+    document.getElementById('greetingName').textContent = `Hey, ${data.firstName}! 👋`;
+    document.getElementById('greetingSub').textContent  =
+      data.stampCount > 0
+        ? `You've got ${data.stampCount} stamp${data.stampCount !== 1 ? 's' : ''} on your card.`
+        : 'Start collecting stamps on your next visit!';
+
+    // Reward banner
+    if (data.stampCount >= 8) {
+      document.getElementById('rewardBanner').classList.add('visible');
+    }
+
+    // Card
+    document.getElementById('cardName').textContent      = `${data.firstName} ${data.lastName}`.trim();
+    document.getElementById('stampCountBig').textContent = data.stampCount;
+
+    buildStampGrid(data.stampCount, prevCount);
+
+    // QR
+    if (data.personalQrUrl) {
+      document.getElementById('qrImg').src = data.personalQrUrl;
+    }
+
+    // Stats
+    document.getElementById('statVisits').textContent      = data.lifetimeVisits;
+    document.getElementById('statRewards').textContent     = data.rewardsRedeemed;
+    document.getElementById('statMemberSince').textContent = formatDate(data.firstVisitDate);
+
+    // Party
+    if (data.party) {
+      const days = daysUntil(data.party.date);
+      document.getElementById('partySection').style.display = 'block';
+      document.getElementById('countdownDays').textContent  = days !== null ? days : '—';
+      document.getElementById('partyDetails').textContent   =
+        `${data.party.package || 'Party'} · ${data.party.guestCount ? data.party.guestCount + ' guests' : ''} · ${new Date(data.party.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`.trim().replace(/·\s*$/, '');
+    }
+
+    // Partner
+    if (data.partnerName) {
+      document.getElementById('partnerDisplay').style.display = 'flex';
+      document.getElementById('addPartnerArea').querySelector('button').style.display = 'none';
+      document.getElementById('partnerName').textContent   = data.partnerName;
+      document.getElementById('partnerAvatar').textContent = initials(data.partnerName);
+    }
+
+    // Children
+    renderChildrenDisplay(data.children || []);
+    initChildForm(data.children || []);
+  }
+
+  function renderChildrenDisplay(children) {
+    const el = document.getElementById('childrenDisplay');
+    if (!children.length) {
+      el.innerHTML = '<p style="font-size:0.85rem;color:var(--ink-mute);margin:0">No children added yet.</p>';
+      return;
+    }
+    el.innerHTML = children.map(c => `
+      <div class="family-member">
+        <div class="family-avatar" style="background:var(--navy)">${initials(c.name)}</div>
+        <div class="family-info">
+          <div class="family-name">${c.name}</div>
+          <div class="family-sub">${c.dob ? 'Born ' + new Date(c.dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Child form ───────────────────────────────────────────────────────
+  let childData = [];
+
+  function initChildForm(children) {
+    childData = children.map(c => ({ name: c.name || '', dob: c.dob || '' }));
+  }
+
+  function renderChildRows() {
+    const container = document.getElementById('childRows');
+    container.innerHTML = '';
+    childData.forEach((child, i) => {
+      const row = document.createElement('div');
+      row.className = 'child-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Child's name" value="${child.name}" data-i="${i}" data-field="name" />
+        <input type="date" value="${child.dob}" data-i="${i}" data-field="dob" />
+        <button class="btn-remove" data-i="${i}" title="Remove">×</button>
+      `;
+      container.appendChild(row);
+    });
+
+    document.getElementById('addChildRowBtn').style.display =
+      childData.length < 4 ? 'block' : 'none';
+
+    container.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        childData[e.target.dataset.i][e.target.dataset.field] = e.target.value;
+      });
+    });
+
+    container.querySelectorAll('.btn-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        childData.splice(parseInt(e.target.dataset.i), 1);
+        renderChildRows();
+      });
+    });
+  }
+
+  document.getElementById('editChildrenBtn').addEventListener('click', () => {
+    document.getElementById('childrenDisplay').style.display = 'none';
+    document.getElementById('editChildrenBtn').style.display = 'none';
+    document.getElementById('childForm').classList.add('open');
+    if (!childData.length) childData.push({ name: '', dob: '' });
+    renderChildRows();
+  });
+
+  document.getElementById('addChildRowBtn').addEventListener('click', () => {
+    if (childData.length < 4) {
+      childData.push({ name: '', dob: '' });
+      renderChildRows();
+    }
+  });
+
+  document.getElementById('cancelChildrenBtn').addEventListener('click', () => {
+    document.getElementById('childForm').classList.remove('open');
+    document.getElementById('childrenDisplay').style.display = 'block';
+    document.getElementById('editChildrenBtn').style.display = 'inline-flex';
+    document.getElementById('childrenMsg').className = 'save-msg';
+  });
+
+  document.getElementById('saveChildrenBtn').addEventListener('click', async () => {
+    const msgEl = document.getElementById('childrenMsg');
+    msgEl.className = 'save-msg';
+
+    const validChildren = childData.filter(c => c.name.trim());
+    try {
+      const res = await fetch('/api/member/children', {
+        method:      'PUT',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body:        JSON.stringify({ children: validChildren }),
+      });
+      const data = await res.json();
+      if (!res.ok) { msgEl.textContent = data.error; msgEl.className = 'save-msg err'; return; }
+
+      renderChildrenDisplay(validChildren);
+      document.getElementById('childForm').classList.remove('open');
+      document.getElementById('childrenDisplay').style.display = 'block';
+      document.getElementById('editChildrenBtn').style.display = 'inline-flex';
+      toast('Children saved ✓');
+    } catch {
+      msgEl.textContent = 'Could not save — try again';
+      msgEl.className = 'save-msg err';
+    }
+  });
+
+  // ── Partner linking ──────────────────────────────────────────────────
+  document.getElementById('addPartnerBtn').addEventListener('click', () => {
+    document.getElementById('partnerForm').classList.toggle('open');
+  });
+
+  document.getElementById('linkPartnerBtn').addEventListener('click', async () => {
+    const phone = document.getElementById('partnerPhone').value.trim();
+    const msgEl = document.getElementById('partnerMsg');
+    msgEl.className = 'save-msg';
+
+    if (!phone) { msgEl.textContent = 'Enter a phone number'; msgEl.className = 'save-msg err'; return; }
+
+    try {
+      const res  = await fetch('/api/member/family', {
+        method:      'PUT',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body:        JSON.stringify({ partnerPhone: phone }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) { msgEl.textContent = data.error; msgEl.className = 'save-msg err'; return; }
+
+      document.getElementById('partnerDisplay').style.display = 'flex';
+      document.getElementById('addPartnerBtn').style.display  = 'none';
+      document.getElementById('partnerForm').classList.remove('open');
+      document.getElementById('partnerName').textContent   = data.partnerName;
+      document.getElementById('partnerAvatar').textContent = initials(data.partnerName);
+      toast('Partner linked ✓');
+    } catch {
+      msgEl.textContent = 'Could not link — try again';
+      msgEl.className = 'save-msg err';
+    }
+  });
+
+  // ── Logout ───────────────────────────────────────────────────────────
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/portal/login.html';
+  });
+
+  // ── Bootstrap ────────────────────────────────────────────────────────
+  (async () => {
+    try {
+      const res = await fetch('/api/member/me', { credentials: 'include' });
+
+      if (res.status === 401) {
+        window.location.href = '/portal/login.html';
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      renderMember(data);
+
+      document.getElementById('mainContent').style.display   = 'flex';
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    } catch (err) {
+      console.error(err);
+      window.location.href = '/portal/login.html';
+    }
+  })();
+</script>
+
+</body>
+</html>

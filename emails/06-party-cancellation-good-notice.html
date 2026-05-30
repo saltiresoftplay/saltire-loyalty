@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Party cancellation &mdash; Saltire Soft Play</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f0;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f0;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:6px;overflow:hidden;">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background-color:#024C97;padding:28px 40px;text-align:center;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td style="padding-right:12px;vertical-align:middle;">
+                    <svg width="36" height="26" viewBox="0 0 30 22" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="22" fill="#024C97"/><path d="M0,0 L30,22 M30,0 L0,22" stroke="#ffffff" stroke-width="4"/></svg>
+                  </td>
+                  <td style="vertical-align:middle;text-align:left;">
+                    <span style="display:block;font-family:Arial,sans-serif;font-size:22px;font-weight:900;letter-spacing:0.08em;color:#ffffff;text-transform:uppercase;line-height:1;">SALTIRE</span>
+                    <span style="display:block;font-family:Arial,sans-serif;font-size:10px;font-weight:400;letter-spacing:0.2em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-top:2px;">soft play</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#222;">Hi {{contact.first_name}},</p>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#222;">Thank you for letting us know &mdash; we are sorry to hear you need to cancel.</p>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#222;">As you have given us sufficient notice, we will arrange a full refund of your &pound;{{contact.party_deposit_paid}} deposit. You should see this back in your account within 5 to 7 working days.</p>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#222;">If you would like to rebook at a later date, we would be more than happy to help. Just get in touch when you are ready and we will find a date that works.</p>
+              <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#222;">We hope everything is okay and that {{contact.child_name}} still gets a great birthday celebration.</p>
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#222;">Warm regards,<br/><strong>Saltire Soft Play</strong></p>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#f4f4f0;padding:24px 40px;text-align:center;border-top:1px solid #e8e8e0;">
+              <p style="margin:0 0 4px;font-size:13px;color:#444;"><strong>Saltire Soft Play</strong></p>
+              <p style="margin:0 0 4px;font-size:12px;color:#666;">Unit 1, Mayfield Industrial Estate, Mayfield, EH22 4AD</p>
+              <p style="margin:0 0 4px;font-size:12px;color:#666;">
+                <a href="tel:01316601111" style="color:#024C97;text-decoration:none;">0131 660 1111</a>
+                &nbsp;&middot;&nbsp;
+                <a href="mailto:{{location.email}}" style="color:#024C97;text-decoration:none;">{{location.email}}</a>
+              </p>
+              <p style="margin:8px 0 0;font-size:11px;color:#999;">Open 7 days &middot; 9.00am &ndash; 5.30pm</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
