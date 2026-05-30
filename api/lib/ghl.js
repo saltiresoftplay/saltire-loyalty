@@ -1,36 +1,36 @@
 'use strict';
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
-const BASE_URL = process.env.GHL_API_BASE_URL;
+const BASE_URL = 'https://services.leadconnectorhq.com';
 const TOKEN    = process.env.GHL_API_TOKEN;
-const VERSION  = process.env.GHL_API_VERSION;
+const VERSION  = '2021-07-28';
 const LOC_ID   = process.env.GHL_LOCATION_ID;
 
 const FIELDS = {
-  stampCount:        process.env.GHL_FIELD_STAMP_COUNT,
-  lifetimeVisits:    process.env.GHL_FIELD_LIFETIME_VISITS,
-  firstVisitDate:    process.env.GHL_FIELD_FIRST_VISIT_DATE,
-  lastVisitDate:     process.env.GHL_FIELD_LAST_VISIT_DATE,
-  lastScanTimestamp: process.env.GHL_FIELD_LAST_SCAN_TIMESTAMP,
-  personalQrUrl:     process.env.GHL_FIELD_PERSONAL_QR_URL,
-  referralCode:      process.env.GHL_FIELD_REFERRAL_CODE,
-  referredBy:        process.env.GHL_FIELD_REFERRED_BY,
-  rewardsRedeemed:   process.env.GHL_FIELD_REWARDS_REDEEMED,
-  lastRewardIssued:  process.env.GHL_FIELD_LAST_REWARD_ISSUED,
-  passwordHash:      process.env.GHL_FIELD_PASSWORD_HASH,
-  familyLinkedId:    process.env.GHL_FIELD_FAMILY_LINKED_ID,
-  child1Name:        process.env.GHL_FIELD_CHILD_1_NAME,
-  child1Dob:         process.env.GHL_FIELD_CHILD_1_DOB,
-  child2Name:        process.env.GHL_FIELD_CHILD_2_NAME,
-  child2Dob:         process.env.GHL_FIELD_CHILD_2_DOB,
-  child3Name:        process.env.GHL_FIELD_CHILD_3_NAME,
-  child3Dob:         process.env.GHL_FIELD_CHILD_3_DOB,
-  child4Name:        process.env.GHL_FIELD_CHILD_4_NAME,
-  child4Dob:         process.env.GHL_FIELD_CHILD_4_DOB,
-  partyDate:         process.env.GHL_FIELD_PARTY_DATE,
-  partyPackage:      process.env.GHL_FIELD_PARTY_PACKAGE,
-  partyGuestCount:   process.env.GHL_FIELD_PARTY_GUEST_COUNT,
-  partyNotes:        process.env.GHL_FIELD_PARTY_NOTES,
+  stampCount:        'g8EBSAicAXcfS32PAlZO',
+  lifetimeVisits:    'qdNIirCcOMquoStAzRBp',
+  firstVisitDate:    'CWRlsk3dJ4VG0cUkwK0K',
+  lastVisitDate:     'TcN4fstOuff5xVGe5Jwx',
+  lastScanTimestamp: 'RLijEa02hBzeg4ixeaGz',
+  personalQrUrl:     '3zTHmUdMlCRQtWgcTmqs',
+  referralCode:      'Y7sIxdotUfcz4zu9qG8S',
+  referredBy:        'gc8JmKKA7SCXC7dbyhOl',
+  rewardsRedeemed:   'iuU3ZgLZrKfax5sUILl9',
+  lastRewardIssued:  '3OZAyCckqmnhXb3RTHAv',
+  passwordHash:      '0DZlNdpsilXyWT5rezsk',
+  familyLinkedId:    'AxezlcHfuZhV6jEEgenT',
+  child1Name:        'mYYd3f2rXjWmEb33an6N',
+  child1Dob:         'TFDgao7cDioMFQ4AENvz',
+  child2Name:        '7FvMu98kWec0WgastbkV',
+  child2Dob:         'faWokBrIbEBI19dXUQiK',
+  child3Name:        '4Fnt9e1cDeQ6Y7um2WqC',
+  child3Dob:         'ZAZmaWMFCl9dbylJcLKE',
+  child4Name:        '39OigsGWguIS8QYyFI0P',
+  child4Dob:         'jTFdpSJDp0HWGNFAOJuP',
+  partyDate:         'NTioNR8K9cPYrXS0WDfW',
+  partyPackage:      'Rk3q0wh7YHPzPTyPJX7E',
+  partyGuestCount:   'nocWSCQn7GnONilE5mfC',
+  partyNotes:        '55QCGb5wb5yltkqP7JtD',
 };
 
 function headers() {
